@@ -24,13 +24,30 @@ class Home extends Component {
         this.fetchItems(endpoint)
     }
 
+    searchItems = (searchTerm) => {
+        console.log(searchTerm);
+        let endpoint = '';
+        this.setState({
+            movies: [],
+            loading: true,
+            searchTerm
+        })
+
+        if (searchTerm === '') {
+            endpoint = `${API_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=1`;
+        }else {
+            endpoint = `${API_URL}search/movie?api_key=${API_KEY}&language=en-US&query=${searchTerm}`;
+        }
+        this.fetchItems(endpoint);
+
+    } 
+
     loadMoreItems = () => {
-        let endpoint = '',
+        let endpoint = '';
         this.setState({ loading: true });
 
         if (this.state.searchTerm === '') {
             endpoint = `${API_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=${this.state.currentPage + 1}`;
-
         }else {
             endpoint = `${API_URL}search/movie?api_key=${API_KEY}&language=en-US&query${this.state.searchTerm}&page=${this.state.currentPage + 1}`;
         }
@@ -41,7 +58,7 @@ class Home extends Component {
         fetch(endpoint)
         .then(result => result.json())
         .then(result => {
-            this.state({
+            this.setState({
                 movies: [...this.state.movies, ...result.results],
                 HeroImage: this.state.HeroImage || result.results[0],
                 loading: false,
@@ -49,13 +66,22 @@ class Home extends Component {
                 totalPages: result.total_pages
             })
         })
+        .catch(error => console.error('Error:', error))
     }
 
     render() {
         return (
             <div className="rmdb-home">
-                <HeroImage />
-                <SearchBar />
+                {this.state.HeroImage ?
+                <div>
+                <HeroImage 
+                image={`${IMAGE_BASE_URL}${BACKDROP_SIZE}/${this.state.HeroImage.backdrop_path}`}
+                title={this.state.HeroImage.original_title}
+                text={this.state.HeroImage.overview}
+                />
+                <SearchBar callback={this.searchItems} />
+                </div> : null }
+                
                 <FourColGrid />
                 <Spinner />
                 <LoadMoreBtn />
