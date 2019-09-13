@@ -62,8 +62,7 @@ class Movie extends Component {
                 : null }
                 {this.state.actors ? 
                     <div className="rmdb-movie-grid">
-                        <FourColGrid> 
-                            header={'Actors'}
+                        <FourColGrid header={'Actors'}>  
                             {this.state.actors.map( (element, i) => {
                                 return <Actor key={i} actor={element} />
                             })}
