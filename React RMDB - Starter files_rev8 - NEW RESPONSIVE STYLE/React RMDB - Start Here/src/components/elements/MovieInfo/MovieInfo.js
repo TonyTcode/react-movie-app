@@ -14,9 +14,9 @@ const MovieInfo = (props) => {
             <div className="rmdb-movieinfo-content">
                 <div className="rmdb-movieinfo-thumb">
                     <MovieThumb
-                        image={props.movie.poster_path ? `${IMAGE_BASE_URL}${POSTER_SIZE}${props.movie_path}` : './images/no_image.jpg'}
+                        image={props.movie.poster_path ? `${IMAGE_BASE_URL}${POSTER_SIZE}${props.movie.poster_path}` : './images/no_image.jpg'}
                         clickable={false}
-                        />
+                    />
                 </div>
                 <div className="rmdb-movieinfo-text">
                     <h1>{props.movie.title}</h1>
