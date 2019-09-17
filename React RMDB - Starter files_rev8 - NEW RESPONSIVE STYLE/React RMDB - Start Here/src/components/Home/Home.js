@@ -58,25 +58,28 @@ class Home extends Component {
         this.fetchItems(endpoint);
     }
 
-    fetchItems = (endpoint) => {
+    fetchItems = async endpoint => {
         const { movies, heroImage, searchTerm} = this.state;
-
-        fetch(endpoint)
-        .then(result => result.json())
-        .then(result => {
-            this.setState({
+        const result = await (await fetch(endpoint)).json();
+        try {
+        this.setState(
+            {
                 movies: [...movies, ...result.results],
                 heroImage: heroImage || result.results[0],
                 loading: false,
                 currentPage: result.page,
                 totalPages: result.total_pages
-            }, () => {
+            }, 
+            () => {
                 if (searchTerm === "") {
                     sessionStorage.setItem('HomeState', JSON.stringify(this.state));
                 }
-            })
-        })
-        .catch(error => console.error('Error:', error))
+            }
+        );
+        }
+        catch (e) {
+            console.log("There was an error: ", e);
+        }
     }
 
     render() {
