@@ -11,7 +11,7 @@ import './Home.css';
 class Home extends Component {
     state = {
         movies: [],
-        HeroImage: null,
+        heroImage: null,
         loading: false,
         currentPage: 0,
         totalPages: 0,
@@ -19,8 +19,8 @@ class Home extends Component {
     }
 
     componentDidMount() {
-        if (localStorage.getItem('HomeState')) {
-            const state = JSON.parse(localStorage.getItem('HomeState'));
+        if (sessionStorage.getItem('HomeState')) {
+            let state = JSON.parse(sessionStorage.getItem('HomeState'));
             this.setState({ ...state });
         } else {
             this.setState({ loading: true});
@@ -30,7 +30,6 @@ class Home extends Component {
     }
 
     searchItems = (searchTerm) => {
-        console.log(searchTerm);
         let endpoint = '';
         this.setState({
             movies: [],
@@ -44,34 +43,36 @@ class Home extends Component {
             endpoint = `${API_URL}search/movie?api_key=${API_KEY}&language=en-US&query=${searchTerm}`;
         }
         this.fetchItems(endpoint);
-
     } 
 
     loadMoreItems = () => {
+        const { searchTerm, currentPage} = this.state;
         let endpoint = '';
         this.setState({ loading: true });
 
-        if (this.state.searchTerm === '') {
-            endpoint = `${API_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=${this.state.currentPage + 1}`;
+        if (searchTerm === '') {
+            endpoint = `${API_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=${currentPage + 1}`;
         }else {
-            endpoint = `${API_URL}search/movie?api_key=${API_KEY}&language=en-US&query=${this.state.searchTerm}&page=${this.state.currentPage + 1}`;
+            endpoint = `${API_URL}search/movie?api_key=${API_KEY}&language=en-US&query=${searchTerm}&page=${currentPage + 1}`;
         }
         this.fetchItems(endpoint);
     }
 
     fetchItems = (endpoint) => {
+        const { movies, heroImage, searchTerm} = this.state;
+
         fetch(endpoint)
         .then(result => result.json())
         .then(result => {
             this.setState({
-                movies: [...this.state.movies, ...result.results],
-                HeroImage: this.state.HeroImage || result.results[0],
+                movies: [...movies, ...result.results],
+                heroImage: heroImage || result.results[0],
                 loading: false,
                 currentPage: result.page,
                 totalPages: result.total_pages
-            }, ()=> {
-                if (this.state.searchTerm === ""){
-                    localStorage.setItem('HomeState', JSON.stringify(this.state));
+            }, () => {
+                if (searchTerm === "") {
+                    sessionStorage.setItem('HomeState', JSON.stringify(this.state));
                 }
             })
         })
@@ -79,34 +80,36 @@ class Home extends Component {
     }
 
     render() {
+        const { movies, heroImage, loading, currentPage, totalPages, searchTerm} = this.state;
+
         return (
             <div className="rmdb-home">
-                {this.state.HeroImage ?
-                <div>
-                <HeroImage 
-                image={`${IMAGE_BASE_URL}${BACKDROP_SIZE}/${this.state.HeroImage.backdrop_path}`}
-                title={this.state.HeroImage.original_title}
-                text={this.state.HeroImage.overview}
-                />
-                <SearchBar callback={this.searchItems} />
-                </div> : null }
-                <div className="rmdb-home-grid">
+                {heroImage ?
+                    <div>
+                        <HeroImage 
+                        image={`${IMAGE_BASE_URL}${BACKDROP_SIZE}${heroImage.backdrop_path}`}
+                        title={heroImage.original_title}
+                        text={heroImage.overview}
+                        />
+                        <SearchBar callback={this.searchItems} />
+                    </div> : null }
+                    <div className="rmdb-home-grid">
                     <FourColGrid
-                        header={this.state.searchTerm ? 'Search Results' : 'Popular Movies'}
-                        loading={this.state.loading}
+                        header={searchTerm ? 'Search Results' : 'Popular Movies'}
+                        loading={loading}
                         >
-                        {this.state.movies.map ( ( element, i) => {
-                            return <MovieThumb
+                        {movies.map ( ( element, i) => (
+                             <MovieThumb
                                 key={1}
                                 clickable={true}
-                                image={element.poster_path ? `${IMAGE_BASE_URL}${POSTER_SIZE}/${element.poster_path}`: './images/no_image.jpg'}
+                                image={element.poster_path ? `${IMAGE_BASE_URL}${POSTER_SIZE}${element.poster_path}`: './images/no_image.jpg'}
                                 movieId={element.id}
                                 movieName={element.original_title}
                                 />
-                        })}
+                            ))}
                     </FourColGrid>
-                    {this.state.loading ? <Spinner /> : null}
-                    {(this.state.currentPage <= this.state.totalPages && !this.state.loading) ?
+                    {loading ? <Spinner /> : null}
+                    {(currentPage <= totalPages && !loading) ?
                         <LoadMoreBtn text="Load More" onClick={this.loadMoreItems} />
                         : null }
                 </div>
