@@ -30,7 +30,7 @@ const MovieInfo = (props) => {
                     </div>
                     {props.directors.length > 1 ? <h3>DIRECTORS</h3> : <h3>DIRECTOR</h3>}
                     {props.directors.map( (element, i ) => {
-                        return <p key={1} className="rmdb-director">{element.name}</p>
+                        return <p key={i} className="rmdb-director">{element.name}</p>
                     })}
                 </div>
                 <FontAwesome className="fa-film" name="film" size="5x" />
